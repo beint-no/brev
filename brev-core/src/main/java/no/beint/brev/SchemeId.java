@@ -2,6 +2,8 @@ package no.beint.brev;
 
 /** A four-digit ISO 6523/EAS identifier scheme code. */
 public record SchemeId(String value) {
+    public static final SchemeId NORWEGIAN_ORGANIZATION = new SchemeId("0192");
+
     public SchemeId {
         Values.nonBlank(value, "scheme ID", 4);
         if (value.length() != 4 || !isAsciiDigits(value)) {

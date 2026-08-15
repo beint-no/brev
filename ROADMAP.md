@@ -10,9 +10,11 @@ Status: in progress in `0.1.0-SNAPSHOT`.
 - [x] Zero-runtime-dependency enforcement.
 - [x] Typed participant, endpoint, currency, country, and unit values.
 - [x] Exact release metadata for Billing 3.0.21 / validation artefacts 1.3.16.
-- [x] Immutable positive-invoice vertical slice.
+- [x] Immutable Billing invoice and credit-note model covering ReAI output.
 - [x] Derived line, tax, and payable totals.
-- [x] Direct buffered UTF-8 UBL writer.
+- [x] Direct buffered UTF-8 UBL writer for Invoice and CreditNote.
+- [x] Bounded StAX reader for inbound Invoice and CreditNote.
+- [x] One-repo modules for documents, SMP types, and AP types.
 - [x] XML escaping, Unicode, immutability, and invariant tests.
 - [x] JMH benchmark entry point.
 - [x] Independent XSD and Schematron validation of the emitted fixture through PHIVE/Saxon.
@@ -20,20 +22,19 @@ Status: in progress in `0.1.0-SNAPSHOT`.
 
 Exit gate: the fixture passes independent current-release validation and benchmark results are recorded with hardware, JDK, commands, throughput, and allocation.
 
-## Phase 1 — complete current Billing model and writer
+## Phase 1 — ReAI Billing surface
 
-- Generate code-list types from the pinned 3.0.21 artefacts.
-- Add credit notes and negative invoices as separate semantic variants.
-- Add all current VAT categories with category-specific required fields.
-- Add document and line allowances/charges.
-- Add payment means, prepayments, rounding, tax-currency totals, periods, delivery, references, attachments, and notes.
-- Add profile 02 without weakening profile 01 construction rules.
-- Express mutually exclusive and conditional groups as sealed types.
-- Stream Base64 attachments without whole-attachment copies.
-- Add deterministic output snapshots for every model branch.
-- Run every generated fixture through XSD, official Peppol/EN16931 Schematron, and at least one independent service.
+Status: the ReAI-used subset is implemented in `brev-documents`. Remaining Billing terms that ReAI does not emit stay out of the API.
 
-Exit gate: every business term supported by Peppol Billing 3.0.21 is either represented and tested or listed as an intentional, specification-cited exclusion. Every fixture passes the authoritative validator.
+- [x] Credit notes as a document type, not a flag on a mutable invoice.
+- [x] VAT categories S, Z, E, G, AE, O with category-specific fields.
+- [x] Price allowances, order/billing references, IBAN/BIC, attachments.
+- [x] Incremental Base64 for embedded documents.
+- [ ] Generate remaining code-list types from the pinned 3.0.21 artefacts.
+- [ ] Document-level allowances, prepayments, rounding, delivery, notes.
+- [ ] Profile 02 without weakening profile 01 construction rules.
+
+Exit gate: every business term ReAI emits is represented, tested, and independently validated. Unused Billing terms remain absent.
 
 ## Phase 2 — validation compiler
 

@@ -14,4 +14,11 @@ dependencyResolutionManagement {
 
 rootProject.name = "brev"
 
-include("brev-core", "brev-billing", "benchmark", "conformance")
+include(
+    "brev-core",
+    "brev-documents",
+    "brev-smp",
+    "brev-ap",
+    "benchmark",
+    "conformance"
+)

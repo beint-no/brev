@@ -1,108 +1,93 @@
 # Brev
 
-**Current Peppol documents, compiled into small and explicit Java.**
+**Current Peppol, as one modular JDK 26 library.**
 
-Brev is an experimental, dependency-free JVM library for constructing, writing, reading, and validating current Peppol business documents. It deliberately does not preserve compatibility with obsolete Peppol releases or expose the complete UBL schema as an object model.
+Brev is a dependency-free JVM library for constructing, writing, reading, and
+later transporting current Peppol business documents. It lives in **one
+repository**. Applications take only the module they need.
 
 The name is Norwegian for “letter.”
 
 > [!WARNING]
-> Brev is an early vertical slice, not yet a conformant replacement for a production Peppol Billing generator or validator. The current code writes a deliberately narrow positive-invoice subset. Authoritative validation remains required before transmission.
+> `0.1.0` replaces ReAI's Digipost + `ph-ubl` document layer. `brev-smp` and
+> `brev-ap` publish types only. Keep official PHIVE validation on the send path
+> until generated-rule parity exists.
 
-## Why Brev
+## Why one repo, not ten
 
-Existing JVM libraries solve important but different problems:
+The Helger stack is the interoperability reference. It is also split across
+many repositories because it preserves every UBL version, every Peppol
+profile, and years of API compatibility.
 
-- `ph-ubl` provides complete JAXB bindings for several UBL versions;
-- the Digipost generator offers a convenient mutable Billing-domain API;
-- PHIVE executes authoritative XSD and Schematron validation artefacts;
-- Phase4 and Oxalis implement full AS4 access-point transport.
+Brev occupies the opposite corner:
 
-Brev targets the unoccupied space between an application's domain model and transport:
+- one repo, independently published modules;
+- current Peppol only;
+- JDK 26 baseline, no older-Java tax;
+- typed documents instead of the full UBL schema;
+- zero third-party runtime dependencies in every published module.
 
-- current Peppol profile semantics rather than every UBL element;
-- distinct immutable Java types instead of interchangeable strings;
-- required data at construction time;
-- calculated totals rather than duplicated mutable values;
-- direct buffered UTF-8 output without DOM, JAXB, reflection, or an intermediate XML string;
-- validation rules compiled from exact official artefacts into ordinary Java;
-- zero third-party runtime dependencies in the document core.
+| Module | Take it when you need | Status |
+|---|---|---|
+| `brev-core` | identifiers, codes, release metadata | shipping |
+| `brev-documents` | Billing invoice/credit note model, writer, reader | shipping |
+| `brev-smp` | typed SMP lookup results | types only |
+| `brev-ap` | typed send/receive messages | types only |
 
-See [DESIGN.md](DESIGN.md) for the architectural rationale, [ROADMAP.md](ROADMAP.md) for the complete implementation plan, and [docs/performance.md](docs/performance.md) for the measured starting point.
+See [docs/modules.md](docs/modules.md), [DESIGN.md](DESIGN.md), and
+[ROADMAP.md](ROADMAP.md).
 
-## Current target
-
-The repository tracks one release target:
+## Current document target
 
 | Component | Target |
 |---|---|
 | Peppol BIS Billing | 3.0.21 |
 | EN 16931 validation artefacts | 1.3.16 |
-| Publication date | 2026-05-20 |
 | Mandatory from | 2026-08-17 |
-| UBL syntax | UBL 2.1 Invoice |
+| UBL syntax | Invoice and CreditNote 2.1 |
 | Process | Billing profile 01 |
 
-Brev does not bundle historical rule sets. See [docs/version-policy.md](docs/version-policy.md).
-
-## Modules
-
-- `brev-core`: participant, endpoint, document, process, currency, country, and unit value types plus release metadata.
-- `brev-billing`: immutable Billing model, derived totals, and direct UBL writer.
-- `conformance`: test-only PHIVE/Saxon reference validation; never a production dependency.
-- `benchmark`: JMH performance harness; never a production dependency.
-
-Planned modules are added only after their conformance gates pass. They include validation, streaming input, SBDH, discovery, reporting, and a Phase4 transport adapter.
+Historical rule sets are not bundled. When Billing 4 is mandatory, Brev will
+replace this writer rather than keep a compatibility flag.
 
 ## Example
 
 ```java
-var nok = new CurrencyCode("NOK");
-var organization = new SchemeId("0192");
-var address = new PostalAddress(
-        "Dokumentveien 1", "Oslo", "0150", new CountryCode("NO"));
+var invoice = BillingDocument.invoice()
+        .id("INV-1")
+        .issueDate(LocalDate.of(2026, 8, 17))
+        .dueDate(LocalDate.of(2026, 9, 1))
+        .currency(new CurrencyCode("NOK"))
+        .buyerReference("buyer-reference")
+        .seller(seller)
+        .buyer(buyer)
+        .payment(new PaymentInstruction("NO9386011117947", "payment-reference"))
+        .line(new BillingLine(
+                "1",
+                "Consulting",
+                new Quantity(new BigDecimal("10"), UnitCode.HOUR),
+                new UnitPrice(new CurrencyCode("NOK"), new BigDecimal("1250")),
+                VatCategory.standard(new BigDecimal("25"))))
+        .build();
 
-var seller = Party.withVat(
-        new EndpointId(organization, "913341464"),
-        "Seller AS", "913341464", "NO913341464MVA", address);
-var buyer = Party.withoutVat(
-        new EndpointId(organization, "987654321"),
-        "Buyer AS", "987654321", address);
-
-var line = new InvoiceLine(
-        "1",
-        "Consulting",
-        new Quantity(new BigDecimal("10"), new UnitCode("HUR")),
-        new UnitPrice(nok, new BigDecimal("1250")),
-        new VatCategory(TaxCategoryCode.STANDARD_RATE, new BigDecimal("25")));
-
-var invoice = new Invoice(
-        "INV-1",
-        LocalDate.of(2026, 8, 17),
-        LocalDate.of(2026, 9, 1),
-        nok,
-        "buyer-reference",
-        seller,
-        buyer,
-        new PaymentInstruction("NO9386011117947", "payment-reference"),
-        List.of(line));
-
-PeppolBillingWriter.write(invoice, outputStream);
+Documents.write(invoice, outputStream);
+BillingDocument parsed = Documents.read(Documents.toByteArray(invoice));
 ```
 
-The writer emits compact XML straight to the supplied stream and does not close it.
+The writer emits compact XML straight to the supplied stream and does not close
+it. Attachments are Base64-encoded incrementally.
 
-## Deliberately unsupported in the first slice
+## What ReAI can generate today
 
-- Credit notes and negative invoices.
-- Allowances, charges, rounding adjustments, prepayments, and multiple payment means.
-- Exempt, reverse-charge, intra-community, export, and out-of-scope VAT categories.
-- Attachments and document references.
-- Full current-profile validation.
-- XML parsing, SBDH, SMP, reporting, and AS4.
-- Older Peppol Billing releases.
+- invoices and credit notes
+- VAT categories S, Z, E, G, AE, O
+- Norwegian supplier identity (0192, VAT, Foretaksregisteret)
+- order reference, billing reference, IBAN/BIC
+- embedded PDF and other attachments
+- price-level allowances
+- optional payment, due date, and address parts
 
-Unsupported features fail through the absence of an API rather than silently producing approximate XML.
+Unsupported Peppol Billing features fail through the absence of an API.
 
 ## Building
 
@@ -113,12 +98,11 @@ Brev requires JDK 26.
 ./gradlew :benchmark:jmh
 ```
 
-The build also runs the PHIVE/Saxon Billing 3.0.21 conformance fixture and fails if either published module acquires a third-party runtime dependency.
-
-## Status
-
-Version `0.1.0-SNAPSHOT` establishes the API direction and provides an executable performance baseline. It must not be used to transmit invoices until the Phase 1 conformance gate in [ROADMAP.md](ROADMAP.md) is complete.
+The build fails if a published module acquires a third-party runtime
+dependency. Conformance runs official PHIVE/Saxon Billing 3.0.21 artefacts as
+a test-only oracle.
 
 ## License
 
-Apache License 2.0. Imported standards and validation artefacts retain their own licenses and provenance.
+Apache License 2.0. Imported standards and validation artefacts retain their
+own licenses and provenance.

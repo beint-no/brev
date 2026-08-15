@@ -16,11 +16,13 @@ plugins {
     id("me.champeau.jmh") version "0.7.3" apply false
 }
 
-val releaseVersion = "0.1.0-SNAPSHOT"
-val publishedModules = setOf("brev-core", "brev-billing")
+val releaseVersion = "0.1.0"
+val publishedModules = setOf("brev-core", "brev-documents", "brev-smp", "brev-ap")
 val moduleDescriptions = mapOf(
-    "brev-core" to "Dependency-free identifiers and value types for current Peppol profiles",
-    "brev-billing" to "Immutable Peppol Billing model and direct UTF-8 UBL writer"
+    "brev-core" to "Dependency-free identifiers, codes, and release metadata for current Peppol profiles",
+    "brev-documents" to "Current Peppol Billing documents: immutable model, direct UTF-8 writer, and bounded reader",
+    "brev-smp" to "Typed Peppol SMP lookup model. Network client is added in a later module release",
+    "brev-ap" to "Typed Peppol access-point send/receive model. Transport adapter is added in a later module release"
 )
 
 allprojects {
