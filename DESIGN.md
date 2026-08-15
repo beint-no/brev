@@ -31,19 +31,21 @@ Brev can therefore coexist with and contribute to those projects. Its initial tr
 application domain
        │
        ▼
-brev-core ── brev-billing ── brev-validation
-                     │                 │
-                     ├── brev-reader   └── reference PHIVE adapter
-                     │
-                     └── brev-sbdh
-                              │
-                              ▼
-                    brev-transport-api
-                              │
-                     phase4 adapter first
-                              │
-                         Peppol network
+brev-core
+       │
+       ├── brev-documents          (Billing write + read)
+       │         │
+       │         └── conformance   (test-only PHIVE/Saxon)
+       │
+       ├── brev-smp                (types now, JDK client later)
+       │
+       └── brev-ap                 (types now, Phase4 adapter later)
+                 │
+            Peppol network
 ```
+
+All of the above live in this repository. Consumers depend on one artifact.
+There is no `ph-commons` equivalent that every module must drag in.
 
 The document layers must not depend on transport. The transport SPI must not leak Phase4 types.
 

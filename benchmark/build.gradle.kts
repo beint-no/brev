@@ -4,5 +4,5 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":brev-billing"))
+    implementation(project(":brev-documents"))
 }
