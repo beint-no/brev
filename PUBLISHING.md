@@ -21,19 +21,13 @@ Generate a Central Portal user token at
 
 ## Release
 
-Set `releaseVersion` in `build.gradle.kts`, then:
-
-```shell
-./gradlew clean build
-./gradlew publishAndReleaseToMavenCentral
-```
-
-The Central Portal typically takes 10–30 minutes after a successful deployment
-before the artifacts are downloadable from Maven Central.
-
-For a CI release, push a matching tag:
+Set `releaseVersion` in `build.gradle.kts`, merge the change to `main`, and push
+a matching tag:
 
 ```shell
 git tag v0.1.0
 git push origin v0.1.0
 ```
+
+GitHub Actions verifies that the tag matches the Gradle version, then builds
+and publishes that exact tagged commit. No local Maven credentials are needed.
