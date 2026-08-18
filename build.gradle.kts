@@ -144,3 +144,8 @@ fun Project.hasInMemorySigningKey(): Boolean {
 tasks.named("build") {
     dependsOn(subprojects.map { it.tasks.named("build") })
 }
+
+tasks.register("printReleaseVersion") {
+    val release = releaseVersion
+    doLast { println(release) }
+}
