@@ -30,6 +30,20 @@ public record PostalAddress(
         this(Optional.of(streetName), Optional.empty(), Optional.of(cityName), Optional.of(postalZone), country);
     }
 
+    public PostalAddress(
+            String streetName,
+            String additionalStreetName,
+            String cityName,
+            String postalZone,
+            CountryCode country) {
+        this(
+                Optional.ofNullable(streetName),
+                Optional.ofNullable(additionalStreetName),
+                Optional.ofNullable(cityName),
+                Optional.ofNullable(postalZone),
+                country);
+    }
+
     public static PostalAddress ofCountry(CountryCode country) {
         return new PostalAddress(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), country);
     }

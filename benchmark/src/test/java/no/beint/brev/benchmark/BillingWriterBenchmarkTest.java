@@ -11,6 +11,8 @@ import no.beint.brev.documents.Documents;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import peppol.bis.invoice3.api.PeppolBillingApi;
 
 import javax.xml.XMLConstants;
@@ -20,6 +22,8 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,6 +78,7 @@ final class BillingWriterBenchmarkTest {
 
         assertValid(brev);
         assertValid(digipost);
+        assertEquals(semanticLeaves(digipost), semanticLeaves(brev));
     }
 
     private static void assertValid(Document document) {
@@ -99,6 +104,36 @@ final class BillingWriterBenchmarkTest {
         return java.util.stream.IntStream.range(0, nodes.getLength())
                 .mapToObj(index -> nodes.item(index).getNodeValue())
                 .toList();
+    }
+
+    private static List<String> semanticLeaves(Document document) {
+        List<String> leaves = new ArrayList<>();
+        collectLeaves(document.getDocumentElement(), "", leaves);
+        return leaves;
+    }
+
+    private static void collectLeaves(Element element, String parentPath, List<String> leaves) {
+        String path = parentPath + "/{" + element.getNamespaceURI() + "}" + element.getLocalName();
+        List<Element> children = new ArrayList<>();
+        for (Node child = element.getFirstChild(); child != null; child = child.getNextSibling()) {
+            if (child instanceof Element childElement) {
+                children.add(childElement);
+            }
+        }
+        if (!children.isEmpty()) {
+            children.forEach(child -> collectLeaves(child, path, leaves));
+            return;
+        }
+        List<String> attributes = new ArrayList<>();
+        for (int index = 0; index < element.getAttributes().getLength(); index++) {
+            Node attribute = element.getAttributes().item(index);
+            if (!XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(attribute.getNamespaceURI())) {
+                attributes.add("{" + attribute.getNamespaceURI() + "}" + attribute.getLocalName()
+                        + "=" + attribute.getNodeValue());
+            }
+        }
+        attributes.sort(Comparator.naturalOrder());
+        leaves.add(path + attributes + "=" + element.getTextContent().strip());
     }
 
     private static Document parse(byte[] xml) throws Exception {

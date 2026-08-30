@@ -1,6 +1,6 @@
 # Performance baseline
 
-These numbers are a development baseline, not a production migration claim. The comparison measures one small positive invoice written to a returned byte array by Brev and by the Digipost generator currently used in ReAI. A fixture test checks that the generated documents contain the same business values.
+These numbers are a development baseline, not a production migration claim. The comparison measures one small positive invoice written to a returned byte array by Brev and by the Digipost generator previously used in ReAI. Compatibility tests compare every semantic XML leaf and attribute for ReAI-shaped invoices and validate both outputs against the current Peppol rules.
 
 ## 2026-08-30 Digipost comparison
 
@@ -16,7 +16,7 @@ These numbers are a development baseline, not a production migration claim. The 
 Command:
 
 ```shell
-java -jar benchmark/build/libs/benchmark-0.1.0-jmh.jar \
+java -jar benchmark/build/libs/benchmark-0.1.1-jmh.jar \
   '.*BillingWriterBenchmark.*' -wi 3 -i 5 -f 2 -w 1s -r 1s -prof gc
 ```
 
@@ -31,12 +31,12 @@ The production artifact envelope for the measured paths is also smaller:
 
 | Generator | Runtime JARs | Classes | Compressed size |
 |---|---:|---:|---:|
-| Brev | 2 | 45 | 88,595 bytes |
+| Brev | 2 | 45 | 89,693 bytes |
 | Digipost + Eaxy + JSR-305 | 4 | 192 | 233,648 bytes |
 
-Brev removes two runtime artifacts, 147 classes, and 145,053 compressed bytes from this path. Its production modules retain zero third-party runtime dependencies.
+Brev removes two runtime artifacts, 147 classes, and 143,955 compressed bytes from this path. Its production modules retain zero third-party runtime dependencies.
 
-This clears the repository's initial 5× throughput and 3× allocation gates for the measured invoice. A ReAI migration still requires shadow generation over representative production-shaped invoices, including credit notes, discounts, multiple VAT categories, rounding, BIC details, and attachments. Both outputs must pass the current PHIVE rules before the old generator can be removed.
+This clears the repository's initial 5× throughput and 3× allocation gates for the measured invoice. The compatibility suite covers invoices, credit notes, discounts, every VAT category ReAI emits, rounding, BIC details, references, and attachments. Both implementations produce the same semantic content and pass the current PHIVE rules in all eight scenarios.
 
 ## 2026-08-14 smoke test
 
@@ -61,13 +61,13 @@ A shorter GC-profiler run reported **17,776 bytes allocated per operation**. Mos
 
 ## Artifact size
 
-The current 0.1.0 production JARs are:
+The current 0.1.1 production JARs are:
 
 | Artifact | Compressed size |
 |---|---:|
-| `brev-core` | 15,775 bytes |
-| `brev-documents` | 72,820 bytes |
-| Combined | 88,595 bytes |
+| `brev-core` | 15,778 bytes |
+| `brev-documents` | 73,915 bytes |
+| Combined | 89,693 bytes |
 
 Both production modules have zero third-party runtime dependencies. The test-only conformance and benchmark modules deliberately carry PHIVE/Saxon/JAXB and JMH respectively.
 
@@ -80,6 +80,6 @@ Before claiming a speedup, add benchmark cases for:
 3. typical, large-line-count, credit-note, discount, multi-VAT, and attachment-heavy invoices;
 4. cold startup and first-document latency;
 5. retained memory under the ReAI workload;
-6. shadow comparison and current PHIVE validation over a representative ReAI invoice corpus.
+6. shadow comparison over a representative production invoice corpus.
 
 The benchmark input and resulting XML must be semantically equivalent and independently validated.

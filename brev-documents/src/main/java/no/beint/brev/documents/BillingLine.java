@@ -65,6 +65,16 @@ public record BillingLine(
         this(id, itemName, quantity, unitPrice, vatCategory, netAmount, priceAllowance, Optional.empty());
     }
 
+    public BillingLine(
+            String id,
+            String itemName,
+            Quantity quantity,
+            UnitPrice unitPrice,
+            VatCategory vatCategory,
+            Money netAmount) {
+        this(id, itemName, quantity, unitPrice, vatCategory, netAmount, Optional.empty(), Optional.empty());
+    }
+
     public BillingLine withPriceAllowance(Money allowance) {
         return new BillingLine(
                 id, itemName, quantity, unitPrice, vatCategory, netAmount, Optional.of(allowance), itemDescription);

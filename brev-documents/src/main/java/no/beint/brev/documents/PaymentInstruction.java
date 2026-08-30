@@ -25,4 +25,8 @@ public record PaymentInstruction(
     public PaymentInstruction(String accountId, String paymentReference) {
         this(accountId, Optional.of(paymentReference), Optional.empty());
     }
+
+    public PaymentInstruction(String accountId, String paymentReference, String bic) {
+        this(accountId, Optional.ofNullable(paymentReference), Optional.ofNullable(bic));
+    }
 }

@@ -9,9 +9,9 @@ repository**. Applications take only the module they need.
 The name is Norwegian for “letter.”
 
 > [!WARNING]
-> `0.1.0` replaces ReAI's Digipost + `ph-ubl` document layer. `brev-smp` and
-> `brev-ap` publish types only. Keep official PHIVE validation on the send path
-> until generated-rule parity exists.
+> `0.1.1` replaces ReAI's Digipost billing writer. ReAI still uses `ph-ubl` for
+> inbound documents, while `brev-smp` and `brev-ap` publish types only. Keep
+> official PHIVE validation on the send path until generated-rule parity exists.
 
 ## Why one repo, not ten
 

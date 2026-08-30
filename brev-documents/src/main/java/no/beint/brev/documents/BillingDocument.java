@@ -280,6 +280,8 @@ public final class BillingDocument {
         private Optional<PaymentInstruction> payment = Optional.empty();
         private final List<AdditionalDocument> additionalDocuments = new ArrayList<>();
         private final List<BillingLine> lines = new ArrayList<>();
+        private Optional<List<TaxSubtotal>> explicitTaxSubtotals = Optional.empty();
+        private Optional<Money> explicitPayableAmount = Optional.empty();
 
         private Builder(BillingDocumentType type) {
             this.type = type;
@@ -345,6 +347,25 @@ public final class BillingDocument {
             return this;
         }
 
+        /**
+         * Uses ledger-calculated VAT subtotals instead of deriving VAT from the line net amounts.
+         * This preserves imported and line-rounded accounting values.
+         */
+        public Builder taxSubtotals(List<TaxSubtotal> taxSubtotals) {
+            Objects.requireNonNull(taxSubtotals, "taxSubtotals");
+            if (taxSubtotals.isEmpty()) {
+                throw new IllegalArgumentException("tax subtotals must not be empty");
+            }
+            this.explicitTaxSubtotals = Optional.of(List.copyOf(taxSubtotals));
+            return this;
+        }
+
+        /** Sets the ledger-calculated amount due; any difference from the tax-inclusive total is emitted as rounding. */
+        public Builder payableAmount(Money payableAmount) {
+            this.explicitPayableAmount = Optional.of(Objects.requireNonNull(payableAmount, "payableAmount"));
+            return this;
+        }
+
         public BillingDocument build() {
             String documentId = BillingValues.nonBlank(id, "document ID", 100);
             LocalDate issued = Objects.requireNonNull(issueDate, "issueDate");
@@ -379,11 +400,24 @@ public final class BillingDocument {
             Money lineExtension = copiedLines.stream()
                     .map(BillingLine::netAmount)
                     .reduce(Money.zero(documentCurrency), Money::add);
-            List<TaxSubtotal> subtotals = deriveTaxSubtotals(copiedLines, documentCurrency);
+            List<TaxSubtotal> subtotals = explicitTaxSubtotals
+                    .orElseGet(() -> deriveTaxSubtotals(copiedLines, documentCurrency));
+            Money taxableTotal = Money.zero(documentCurrency);
+            for (TaxSubtotal subtotal : subtotals) {
+                subtotal.taxableAmount().requireSameCurrency(lineExtension);
+                subtotal.taxAmount().requireSameCurrency(lineExtension);
+                taxableTotal = taxableTotal.add(subtotal.taxableAmount());
+            }
+            if (taxableTotal.amount().compareTo(lineExtension.amount()) != 0) {
+                throw new IllegalArgumentException("tax subtotal taxable amounts must equal the line extension total");
+            }
             Money tax = subtotals.stream()
                     .map(TaxSubtotal::taxAmount)
                     .reduce(Money.zero(documentCurrency), Money::add);
-            Money payable = lineExtension.add(tax);
+            Money taxInclusive = lineExtension.add(tax);
+            Money payable = explicitPayableAmount.orElse(taxInclusive);
+            payable.requireSameCurrency(lineExtension);
+            Money rounding = new Money(documentCurrency, payable.amount().subtract(taxInclusive.amount()));
             return new BillingDocument(
                     type,
                     documentId,
@@ -401,9 +435,9 @@ public final class BillingDocument {
                     copiedLines,
                     lineExtension,
                     lineExtension,
-                    payable,
+                    taxInclusive,
                     Optional.empty(),
-                    Optional.empty(),
+                    rounding.amount().signum() == 0 ? Optional.empty() : Optional.of(rounding),
                     payable,
                     subtotals,
                     tax,

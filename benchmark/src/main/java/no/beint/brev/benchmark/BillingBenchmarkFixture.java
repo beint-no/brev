@@ -31,12 +31,12 @@ final class BillingBenchmarkFixture {
                 "Seller AS",
                 "922989451",
                 "NO922989451MVA",
-                address);
+                address).withRegistrationScheme(SchemeId.NORWEGIAN_ORGANIZATION);
         Party buyer = Party.withoutVat(
                 new EndpointId(SchemeId.NORWEGIAN_ORGANIZATION, "987654325"),
                 "Buyer AS",
                 "987654325",
-                address);
+                address).withRegistrationScheme(SchemeId.NORWEGIAN_ORGANIZATION);
         return BillingDocument.invoice()
                 .id("BENCH-1")
                 .issueDate(LocalDate.of(2026, 8, 17))
@@ -85,7 +85,7 @@ final class BillingBenchmarkFixture {
                 new peppol.bis.invoice3.domain.Price(new peppol.bis.invoice3.domain.PriceAmount("1250", "NOK"))
                         .withBaseQuantity(new peppol.bis.invoice3.domain.BaseQuantity("1").withUnitCode("HUR")));
         peppol.bis.invoice3.domain.PaymentMeans payment = new peppol.bis.invoice3.domain.PaymentMeans(
-                new peppol.bis.invoice3.domain.PaymentMeansCode("30"))
+                new peppol.bis.invoice3.domain.PaymentMeansCode("30").withName("Credit transfer"))
                 .withPaymentID("1234567890123456789012345")
                 .withPayeeFinancialAccount(new peppol.bis.invoice3.domain.PayeeFinancialAccount("NO9386011117947"));
         return new peppol.bis.invoice3.domain.Invoice(

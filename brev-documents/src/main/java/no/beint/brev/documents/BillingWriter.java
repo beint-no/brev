@@ -188,19 +188,22 @@ public final class BillingWriter {
             xml.start("cac:TaxSubtotal");
             amount(xml, "cbc:TaxableAmount", subtotal.taxableAmount());
             amount(xml, "cbc:TaxAmount", subtotal.taxAmount());
-            writeTaxCategory(xml, "cac:TaxCategory", subtotal.category());
+            writeTaxCategory(xml, "cac:TaxCategory", subtotal.category(), true);
             xml.end("cac:TaxSubtotal");
         }
         xml.end("cac:TaxTotal");
     }
 
-    private static void writeTaxCategory(Utf8XmlOutput xml, String name, VatCategory category) throws IOException {
+    private static void writeTaxCategory(
+            Utf8XmlOutput xml, String name, VatCategory category, boolean includeExemptionReason) throws IOException {
         xml.start(name);
         xml.element("cbc:ID", category.code().xmlValue());
         if (category.rate().isPresent()) {
             xml.element("cbc:Percent", category.rateXmlValue());
         }
-        xml.optionalElement("cbc:TaxExemptionReason", category.exemptionReason());
+        if (includeExemptionReason) {
+            xml.optionalElement("cbc:TaxExemptionReason", category.exemptionReason());
+        }
         taxScheme(xml, "VAT");
         xml.end(name);
     }
@@ -240,7 +243,7 @@ public final class BillingWriter {
         xml.start("cac:Item");
         xml.optionalElement("cbc:Description", line.itemDescription());
         xml.element("cbc:Name", line.itemName());
-        writeTaxCategory(xml, "cac:ClassifiedTaxCategory", line.vatCategory());
+        writeTaxCategory(xml, "cac:ClassifiedTaxCategory", line.vatCategory(), false);
         xml.end("cac:Item");
         xml.start("cac:Price");
         xml.element(
