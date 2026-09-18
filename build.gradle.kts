@@ -33,7 +33,7 @@ allprojects {
 subprojects {
     plugins.withId("java") {
         extensions.configure<JavaPluginExtension> {
-            toolchain.languageVersion.set(JavaLanguageVersion.of(26))
+            toolchain.languageVersion.set(JavaLanguageVersion.of(27))
         }
 
         dependencies {
@@ -43,7 +43,7 @@ subprojects {
         }
 
         tasks.withType<JavaCompile>().configureEach {
-            options.release.set(26)
+            options.release.set(27)
             options.compilerArgs.addAll(listOf("-Xlint:all", "-Werror"))
         }
 

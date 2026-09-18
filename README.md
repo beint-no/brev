@@ -1,6 +1,6 @@
 # Brev
 
-**Current Peppol, as one modular JDK 26 library.**
+**Current Peppol, as one modular JDK 27 library.**
 
 Brev is a dependency-free JVM library for constructing, writing, reading, and
 later transporting current Peppol business documents. It lives in **one
@@ -23,7 +23,7 @@ Brev occupies the opposite corner:
 
 - one repo, independently published modules;
 - current Peppol only;
-- JDK 26 baseline, no older-Java tax;
+- JDK 27 baseline, no older-Java tax;
 - typed documents instead of the full UBL schema;
 - zero third-party runtime dependencies in every published module.
 
@@ -91,7 +91,7 @@ Unsupported Peppol Billing features fail through the absence of an API.
 
 ## Building
 
-Brev requires JDK 26.
+Brev requires JDK 27.
 
 ```shell
 ./gradlew clean build
