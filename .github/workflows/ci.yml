@@ -15,8 +15,8 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
         with:
-          distribution: oracle
-          java-version: '26'
+          distribution: liberica
+          java-version: '27'
       - uses: gradle/actions/setup-gradle@v5
       - name: Build, test, and verify publications
         run: ./gradlew clean build publishToMavenLocal
