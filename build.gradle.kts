@@ -16,7 +16,7 @@ plugins {
     id("me.champeau.jmh") version "0.7.3" apply false
 }
 
-val releaseVersion = "0.1.1"
+val releaseVersion = "0.1.2"
 val publishedModules = setOf("brev-core", "brev-documents", "brev-smp", "brev-ap")
 val moduleDescriptions = mapOf(
     "brev-core" to "Dependency-free identifiers, codes, and release metadata for current Peppol profiles",
