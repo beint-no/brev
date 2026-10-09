@@ -61,7 +61,7 @@ A shorter GC-profiler run reported **17,776 bytes allocated per operation**. Mos
 
 ## Artifact size
 
-The current 0.1.1 production JARs are:
+The 0.1.1 production JARs measured on 2026-08-30 were:
 
 | Artifact | Compressed size |
 |---|---:|

@@ -9,7 +9,7 @@ repository**. Applications take only the module they need.
 The name is Norwegian for “letter.”
 
 > [!WARNING]
-> `0.1.1` replaces ReAI's Digipost billing writer. ReAI still uses `ph-ubl` for
+> Brev replaces ReAI's former Digipost billing writer. ReAI still uses `ph-ubl` for
 > inbound documents, while `brev-smp` and `brev-ap` publish types only. Keep
 > official PHIVE validation on the send path until generated-rule parity exists.
 

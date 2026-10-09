@@ -4,9 +4,9 @@ The phases are ordered by risk reduction. A later phase does not begin merely be
 
 ## Phase 0 — executable architecture
 
-Status: in progress in `0.1.0-SNAPSHOT`.
+Status: complete; the exit gate was met in `0.1.1` (see `docs/performance.md`).
 
-- [x] JDK 26 modular Gradle build.
+- [x] JDK 27 modular Gradle build.
 - [x] Zero-runtime-dependency enforcement.
 - [x] Typed participant, endpoint, currency, country, and unit values.
 - [x] Exact release metadata for Billing 3.0.21 / validation artefacts 1.3.16.
@@ -18,7 +18,7 @@ Status: in progress in `0.1.0-SNAPSHOT`.
 - [x] XML escaping, Unicode, immutability, and invariant tests.
 - [x] JMH benchmark entry point.
 - [x] Independent XSD and Schematron validation of the emitted fixture through PHIVE/Saxon.
-- [ ] Baseline benchmark against the ReAI Digipost generator path.
+- [x] Baseline benchmark against the ReAI Digipost generator path.
 
 Exit gate: the fixture passes independent current-release validation and benchmark results are recorded with hardware, JDK, commands, throughput, and allocation.
 
@@ -105,6 +105,8 @@ A native Peppol-only AS4 implementation is a separate project decision, not a pr
 7. the Phase4 adapter remains as an independent reference and fallback.
 
 ## Adoption in ReAI
+
+Status: ReAI writes outbound Billing documents with Brev and no longer depends on Digipost; inbound parsing still uses `ph-ubl`, and PHIVE validation remains on the send path.
 
 Adoption should be incremental:
 
